@@ -1,0 +1,58 @@
+{
+  "tap": {
+    "figures": [
+      "pair-quick",
+      "transient-single"
+    ]
+  },
+  "notification": {
+    "instruments": [
+      "drop",
+      "metal-ping",
+      "harp"
+    ],
+    "figures": []
+  },
+  "success": {
+    "instruments": [
+      "harp",
+      "metal-ping",
+      "pluck-nylon",
+      "boop",
+      "drop",
+      "koto",
+      "zap",
+      "pluck-steel",
+      "kalimba",
+      "celesta",
+      "anvil",
+      "tine-soft",
+      "tongue-drum",
+      "hollow-tube"
+    ],
+    "figures": [
+      "transient-single",
+      "cluster",
+      "run-five"
+    ]
+  },
+  "error": {
+    "instruments": [
+      "bell-small"
+    ]
+  },
+  "warning": {
+    "instruments": [
+      "metal-ping",
+      "tongue-drum",
+      "tine-soft",
+      "hollow-tube",
+      "kalimba"
+    ]
+  },
+  "transition": {
+    "instruments": [
+      "pluck-steel"
+    ]
+  }
+}

@@ -1,0 +1,200 @@
+{
+  "tap": {
+    "add-harmonic": {
+      "k": 3,
+      "d": 10
+    },
+    "transpose-wide": {
+      "k": 3,
+      "d": 8
+    },
+    "curve-flip": {
+      "k": 3,
+      "d": 8
+    },
+    "swap-waveform": {
+      "k": 0,
+      "d": 5
+    },
+    "add-noise-tick": {
+      "k": 0,
+      "d": 2
+    },
+    "filter-shift": {
+      "k": 1,
+      "d": 5
+    },
+    "filter-add": {
+      "k": 3,
+      "d": 3
+    },
+    "reshape-envelope": {
+      "k": 1,
+      "d": 5
+    }
+  },
+  "success": {
+    "reshape-envelope": {
+      "k": 5,
+      "d": 14
+    },
+    "transpose-wide": {
+      "k": 11,
+      "d": 30
+    },
+    "retime-layers": {
+      "k": 10,
+      "d": 20
+    },
+    "add-shimmer": {
+      "k": 9,
+      "d": 16
+    },
+    "add-harmonic": {
+      "k": 7,
+      "d": 18
+    },
+    "curve-flip": {
+      "k": 8,
+      "d": 15
+    }
+  },
+  "transition": {
+    "reshape-envelope": {
+      "k": 0,
+      "d": 12
+    },
+    "retime-layers": {
+      "k": 0,
+      "d": 5
+    },
+    "transpose-wide": {
+      "k": 3,
+      "d": 26
+    },
+    "add-shimmer": {
+      "k": 2,
+      "d": 16
+    },
+    "add-echo-layer": {
+      "k": 0,
+      "d": 9
+    },
+    "filter-shift": {
+      "k": 0,
+      "d": 6
+    },
+    "filter-add": {
+      "k": 9,
+      "d": 21
+    },
+    "sweepify": {
+      "k": 6,
+      "d": 25
+    },
+    "invert-direction": {
+      "k": 7,
+      "d": 19
+    }
+  },
+  "error": {
+    "sweepify": {
+      "k": 2,
+      "d": 5
+    },
+    "filter-add": {
+      "k": 5,
+      "d": 2
+    },
+    "add-noise-tick": {
+      "k": 4,
+      "d": 1
+    },
+    "transpose-wide": {
+      "k": 5,
+      "d": 2
+    },
+    "reshape-envelope": {
+      "k": 4,
+      "d": 5
+    },
+    "swap-waveform": {
+      "k": 4,
+      "d": 6
+    }
+  },
+  "notification": {
+    "retime-layers": {
+      "k": 10,
+      "d": 27
+    },
+    "add-harmonic": {
+      "k": 0,
+      "d": 6
+    },
+    "curve-flip": {
+      "k": 10,
+      "d": 23
+    },
+    "transpose-wide": {
+      "k": 9,
+      "d": 25
+    },
+    "add-shimmer": {
+      "k": 7,
+      "d": 26
+    },
+    "reshape-envelope": {
+      "k": 4,
+      "d": 26
+    }
+  },
+  "warning": {
+    "reshape-envelope": {
+      "k": 2,
+      "d": 3
+    },
+    "swap-waveform": {
+      "k": 3,
+      "d": 7
+    },
+    "add-harmonic": {
+      "k": 2,
+      "d": 3
+    },
+    "transpose-wide": {
+      "k": 4,
+      "d": 4
+    },
+    "filter-shift": {
+      "k": 2,
+      "d": 1
+    }
+  },
+  "hover": {
+    "curve-flip": {
+      "k": 3,
+      "d": 1
+    },
+    "filter-shift": {
+      "k": 1,
+      "d": 3
+    },
+    "add-noise-tick": {
+      "k": 0,
+      "d": 6
+    },
+    "reshape-envelope": {
+      "k": 0,
+      "d": 3
+    },
+    "swap-waveform": {
+      "k": 1,
+      "d": 4
+    },
+    "transpose-wide": {
+      "k": 2,
+      "d": 1
+    }
+  }
+}
