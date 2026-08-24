@@ -3,9 +3,9 @@
 Procedural UI sounds for the terminal — a library, a CLI, and a TUI. Every sound is
 synthesized from a recipe; there are no audio files in here.
 
-<video src="https://github.com/possibilities/agentsounds/raw/main/media/tui-demo.mp4" controls muted playsinline width="720"></video>
+![The agentsounds TUI](https://raw.githubusercontent.com/possibilities/agentsounds/main/media/tui-demo.gif)
 
-_[The TUI, with sound](https://github.com/possibilities/agentsounds/raw/main/media/tui-demo.mp4)._
+_The GIF is silent, which rather misses the point — [here is the same 27 seconds with sound](https://github.com/possibilities/agentsounds/raw/main/media/tui-demo.mp4)._
 
 ## Install
 
