@@ -1,6 +1,6 @@
 import { SoundsError } from "./errors.ts";
 import { measure } from "./render.ts";
-import { CATEGORIES, type Category } from "./sounds/audio/categories.ts";
+import { CATEGORIES, CATEGORY_USE_CASES, type Category } from "./sounds/audio/categories.ts";
 import { createFrom } from "./sounds/audio/create.ts";
 import { loudnessVolume } from "./sounds/audio/loudness.ts";
 import { EXPERIMENTAL_LABEL, soundName } from "./sounds/audio/naming.ts";
@@ -192,4 +192,15 @@ function emptyPool(category: Category): SoundsError {
     `no curated sounds are available for "${category}"`,
     "agentsounds notify --list shows the sources that have sounds",
   );
+}
+
+/** The `notify --list` payload: each source and what it is for. */
+export function sourceSummaries(): { source: string; use: string }[] {
+  return SOURCES.map((s) => ({
+    source: s,
+    use:
+      s in CATEGORY_USE_CASES
+        ? CATEGORY_USE_CASES[s as keyof typeof CATEGORY_USE_CASES]
+        : "category-agnostic draws from five engines at once",
+  }));
 }

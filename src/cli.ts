@@ -1,16 +1,10 @@
 #!/usr/bin/env bun
 import { parse } from "./args.ts";
-import {
-  type CommandDescriptor,
-  commandHelp,
-  findCommand,
-  helpJson,
-  sourceSummaries,
-  topHelp,
-} from "./descriptor.ts";
-import { adopt, draw, type Sound, type Source } from "./draw.ts";
+import { CONTRACT, type ContractCommand, findCommand } from "./contract.ts";
+import { adopt, draw, type Sound, type Source, sourceSummaries } from "./draw.ts";
 import { type Envelope, fail, ok, UsageError } from "./envelope.ts";
 import { SoundsError } from "./errors.ts";
+import { agentHelp, agentTeaser, commandHelp, topHelp } from "./help.ts";
 import { play } from "./play.ts";
 import { render } from "./render.ts";
 import { parseSound } from "./sounds/audio/export/snippet.ts";
@@ -35,7 +29,18 @@ function emit(env: Envelope, asJson: boolean, human: () => string): number {
 }
 
 async function readRecipe(from: string): Promise<Sound> {
-  const text = from === "-" ? await Bun.stdin.text() : await Bun.file(from).text();
+  // A missing or unreadable file is the same refusal as an unparseable one: the contract
+  // lists bad_recipe, and a raw ENOENT stack would be an error code it does not publish.
+  let text: string;
+  try {
+    text = from === "-" ? await Bun.stdin.text() : await Bun.file(from).text();
+  } catch (err) {
+    throw new SoundsError(
+      "bad_recipe",
+      `cannot read ${from === "-" ? "stdin" : from}: ${(err as Error).message}`,
+      "pass a file written by `agentsounds notify <source> --print`",
+    );
+  }
   const parsed = parseSound(text);
   if (!parsed.ok) {
     throw new SoundsError(
@@ -48,9 +53,8 @@ async function readRecipe(from: string): Promise<Sound> {
   return adopt(parsed.patch, label);
 }
 
-async function runNotify(c: CommandDescriptor, argv: readonly string[]): Promise<number> {
-  const relaxed = argv.includes("--list") || argv.includes("--sound");
-  const { args, flags } = parse(c, argv, !relaxed);
+async function runNotify(c: ContractCommand, argv: readonly string[]): Promise<number> {
+  const { args, flags } = parse(c, argv);
   const asJson = flags["json"] === true;
 
   if (flags["list"]) {
@@ -60,11 +64,9 @@ async function runNotify(c: CommandDescriptor, argv: readonly string[]): Promise
     );
   }
 
+  // The contract's one_of constraint has already refused a call with neither.
   const from = flags["sound"];
   const source = args[0];
-  if (typeof from !== "string" && source === undefined) {
-    usage("notify needs a source, or --sound to replay a saved recipe", commandHelp(c));
-  }
 
   const sound =
     typeof from === "string"
@@ -104,25 +106,39 @@ async function runNotify(c: CommandDescriptor, argv: readonly string[]): Promise
   });
 }
 
-async function runTui(c: CommandDescriptor, argv: readonly string[]): Promise<number> {
+async function runTui(c: ContractCommand, argv: readonly string[]): Promise<number> {
   parse(c, argv);
   const { start } = await import("./tui/app.ts");
   await start();
   return 0;
 }
 
+function runGuide(c: ContractCommand, argv: readonly string[]): number {
+  const { flags } = parse(c, argv);
+  return emit(ok(CONTRACT), flags["json"] === true, () => agentHelp());
+}
+
 async function main(argv: string[]): Promise<number> {
-  if (argv.includes("--version") && argv[0] === "--version") {
-    process.stdout.write(`${VERSION}\n`);
-    return 0;
-  }
-  if (argv.length === 0 || argv[0] === "--help") {
+  // Everything printed below is rendered from the contract; none of it is authored twice.
+  if (argv.length === 0) {
     process.stdout.write(`${topHelp()}\n`);
-    return argv.length === 0 ? 2 : 0;
+    return 2;
   }
-  if (argv[0] === "--help-json") {
-    process.stdout.write(`${JSON.stringify(helpJson())}\n`);
-    return 0;
+  switch (argv[0]) {
+    case "--version":
+      process.stdout.write(`${VERSION}\n`);
+      return 0;
+    case "--help":
+      process.stdout.write(`${topHelp()}\n`);
+      return 0;
+    case "--agent-help":
+      process.stdout.write(`${agentHelp()}\n`);
+      return 0;
+    case "--agent-teaser":
+      process.stdout.write(`${agentTeaser()}\n`);
+      return 0;
+    case "--help-json":
+      return runGuide(findCommand("guide")!, ["--json"]);
   }
 
   const name = argv[0]!;
@@ -135,12 +151,14 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
   if (rest.includes("--help-json")) {
-    process.stdout.write(`${JSON.stringify(c)}\n`);
+    process.stdout.write(`${JSON.stringify(ok(c))}\n`);
     return 0;
   }
 
   try {
-    return c.name === "notify" ? await runNotify(c, rest) : await runTui(c, rest);
+    if (c.name === "notify") return await runNotify(c, rest);
+    if (c.name === "guide") return runGuide(c, rest);
+    return await runTui(c, rest);
   } catch (err) {
     if (err instanceof UsageError) usage(err.message, commandHelp(c));
     if (err instanceof SoundsError) {

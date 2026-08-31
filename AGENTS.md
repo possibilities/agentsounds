@@ -22,8 +22,11 @@ something, and no test can tell you that.
   iOS, and this does not.
 - `cache.ts` keys rendered WAVs by the Derived name, which is a hash of the recipe. A cache
   hit is therefore always the right file; a miss just renders.
-- `descriptor.ts` is the single source for commands and flags. Help, `--help-json`, and
-  validation all fall out of it — never hand-write a usage string.
+- `contract.ts` is the fleet agent contract, and the single authored description of this
+  CLI: commands, arguments, constraints, error codes, routing prose. `guide --json` emits
+  it verbatim; `help.ts` renders `--help`, `--agent-help`, `--agent-teaser`; `args.ts`
+  parses and enforces its constraints. Never hand-write a usage string or a second copy of
+  a flag — a change to the CLI's surface is a change to `contract.ts` and nothing else.
 - `tui/model.ts` is pure: state, key mapping, history. `tui/app.ts` renders it. The split is
   what makes the interaction contract testable without a renderer.
 - `sounds/` is **vendored and never edited here**. See below.

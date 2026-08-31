@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { parse } from "../src/args.ts";
-import { findCommand, helpJson, topHelp } from "../src/descriptor.ts";
+import { findCommand } from "../src/contract.ts";
 import { UsageError } from "../src/envelope.ts";
+import { commandHelp, topHelp } from "../src/help.ts";
 
 const notify = findCommand("notify")!;
 
@@ -52,21 +53,27 @@ describe("argv", () => {
   });
 
   test("--sound relaxes the required source", () => {
-    expect(() => parse(notify, ["--sound", "a.json"], false)).not.toThrow();
+    expect(() => parse(notify, ["--sound", "a.json"])).not.toThrow();
+  });
+
+  test("a source and a saved recipe cannot be combined", () => {
+    expect(() => parse(notify, ["tap", "--sound", "a.json"])).toThrow(/cannot be combined/);
+  });
+
+  test("a saved recipe refuses the drawing flags", () => {
+    expect(() => parse(notify, ["--sound", "a.json", "--exotic"])).toThrow(/nothing to draw/);
   });
 });
 
-describe("the descriptor drives help", () => {
+describe("the contract drives help", () => {
   test("top help lists every command", () => {
-    for (const name of ["notify", "tui"]) expect(topHelp()).toContain(name);
+    for (const name of ["notify", "tui", "guide"]) expect(topHelp()).toContain(name);
   });
 
-  test("help-json carries the same commands and flags", () => {
-    const json = helpJson() as { commands: { name: string; flags: { name: string }[] }[] };
-    const n = json.commands.find((c) => c.name === "notify")!;
-    const flags = n.flags.map((f) => f.name);
-    for (const flag of ["exotic", "save", "print", "sound", "reverse"]) {
-      expect(flags).toContain(flag);
+  test("command help names every flag the parser accepts", () => {
+    const help = commandHelp(notify);
+    for (const flag of ["--exotic", "--save", "--print", "--sound", "--reverse", "--json"]) {
+      expect(help).toContain(flag);
     }
   });
 });

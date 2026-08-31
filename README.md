@@ -35,6 +35,9 @@ agentsounds notify --sound done.json     # this is what belongs in a hook
 Also: `--save <path>` writes a WAV, `--reverse` plays it backwards, `--no-play` skips the
 sound, `--json` emits a machine-readable envelope, `--help` has the rest.
 
+Agents read `agentsounds guide --json` — the fleet agent contract, with every command, its
+arguments, and the error codes. `--agent-help` is the same document as text.
+
 ```ts
 import { notify, draw, render, play } from "agentsounds";
 ```
