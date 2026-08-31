@@ -67,6 +67,10 @@ export function commandHelp(c: ContractCommand): string {
     for (const k of constraints) lines.push(`  ${k.arguments.join(", ")}: ${k.description}`);
   }
   if (c.stdin) lines.push("", `  stdin (${c.stdin.accepts}): ${c.stdin.description}`);
+  if (c.examples?.length) {
+    lines.push("", "Examples");
+    for (const e of c.examples) lines.push(`  ${e.invocation}`, `${" ".repeat(4)}${e.description}`);
+  }
   return lines.join("\n");
 }
 

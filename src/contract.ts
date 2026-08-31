@@ -21,6 +21,10 @@ export interface ContractArgument {
   choices?: readonly string[];
   default?: unknown;
   aliases?: readonly string[];
+  csv?: boolean;
+  minimum?: number;
+  maximum?: number;
+  role?: "call" | "output-format" | "store-selection" | "meta";
 }
 
 export interface ContractConstraint {
@@ -46,6 +50,10 @@ export interface ContractCommand {
   subcommands?: readonly ContractCommand[];
   stdin?: ContractStdin;
   constraints?: readonly ContractConstraint[];
+  examples?: readonly { invocation: string; description: string }[];
+  blocking?: boolean;
+  aliases?: readonly string[];
+  deprecated?: string;
 }
 
 export interface Contract {
@@ -136,31 +144,37 @@ export const CONTRACT: Contract = {
       name: "--json",
       type: "boolean",
       description: "Emit the envelope on stdout instead of a human line. Preferred for agents.",
+      role: "output-format",
     },
     {
       name: "--help",
       type: "boolean",
       description: "Show help for the command, or for the CLI when given first.",
+      role: "meta",
     },
     {
       name: "--help-json",
       type: "boolean",
       description: "Alias for `guide --json`: the full contract as one envelope.",
+      role: "meta",
     },
     {
       name: "--version",
       type: "boolean",
       description: "Print the version. Top level only.",
+      role: "meta",
     },
     {
       name: "--agent-help",
       type: "boolean",
       description: "Render the contract's guidance and concepts as text. Top level only.",
+      role: "meta",
     },
     {
       name: "--agent-teaser",
       type: "boolean",
       description: "One line naming the tool and how to learn it. Top level only.",
+      role: "meta",
     },
   ],
   commands: [
@@ -226,6 +240,25 @@ export const CONTRACT: Contract = {
           description: "List the sources and what each is for",
         },
       ],
+      examples: [
+        {
+          invocation: "agentsounds notify success",
+          description: "Draw a success sound and play it.",
+        },
+        {
+          invocation: "agentsounds notify tap --exotic",
+          description: "The remix engine instead of the library.",
+        },
+        {
+          invocation: "agentsounds notify success --print > done.json",
+          description: "Draw once, keep the recipe, for anything that fires more than once.",
+        },
+        {
+          invocation: "agentsounds notify --sound done.json",
+          description:
+            "Replay a kept recipe exactly as it sounded when it was picked — what belongs in a hook.",
+        },
+      ],
       constraints: [
         {
           kind: "one_of",
@@ -258,6 +291,12 @@ export const CONTRACT: Contract = {
       guidance:
         "A full-screen terminal app a human drives by ear. It takes over the terminal and never returns structured output, so an agent should not launch it.",
       arguments: [],
+      examples: [
+        {
+          invocation: "agentsounds tui",
+          description: "Browse and audition sounds interactively.",
+        },
+      ],
     },
     {
       name: "guide",
