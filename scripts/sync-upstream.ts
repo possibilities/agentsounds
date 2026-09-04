@@ -11,7 +11,8 @@ import { mkdir, readdir, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const UPSTREAM = process.env["PROCEDURAL_SOUNDS"] ?? join(homedir(), "src", "procedural-sounds");
+const UPSTREAM =
+  process.env["PROCEDURAL_SOUNDS"] ?? join(homedir(), "source", "m1ckc3s--procedural-sounds");
 const HERE = join(import.meta.dir, "..");
 const STAMP = join(HERE, "src", "sounds", "UPSTREAM");
 
