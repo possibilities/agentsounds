@@ -177,11 +177,24 @@ describe("Sounds producer MCP", () => {
     expect(tools.map((tool) => tool.name).sort()).toEqual(["guide", "notify"]);
     const notify = tools.find((tool) => tool.name === "notify");
     expect(notify?.inputSchema.properties?.modality).toMatchObject({ default: "familiar" });
-    expect(notify?.inputSchema.oneOf).toEqual([
-      { required: ["source"] },
-      { required: ["sound"] },
-      { required: ["list"], properties: { list: { const: true } } },
+    const alternatives = notify?.inputSchema.oneOf as Array<{
+      required: string[];
+      properties: Record<string, unknown>;
+    }>;
+    expect(alternatives.map((branch) => branch.required)).toEqual([
+      ["source"],
+      ["sound"],
+      ["list"],
     ]);
+    // Hosts that describe branches independently must still see all fields.
+    for (const branch of alternatives) {
+      expect(branch.properties.source).toMatchObject({ type: "string", enum: expect.any(Array) });
+      expect(branch.properties.sound).toMatchObject({ type: "string" });
+      expect(branch.properties.modality).toMatchObject({ default: "familiar" });
+      expect(branch.properties["no-play"]).toMatchObject({ type: "boolean" });
+      expect(branch.properties).not.toHaveProperty("json");
+    }
+    expect(alternatives[2]?.properties.list).toMatchObject({ type: "boolean", const: true });
     expect(notify?.inputSchema.properties).not.toHaveProperty("json");
     expect(notify?.inputSchema.additionalProperties).toBe(false);
     expect(notify?.annotations).toMatchObject({

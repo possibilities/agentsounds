@@ -109,6 +109,27 @@ export function agentTools(document: Contract): AgentTool[] {
     const shape: Record<string, z.ZodType> = {};
     for (const argument of args) shape[propertyName(argument.name)] = property(argument);
     const mapped = constraints(leaf);
+    const input = z.strictObject(shape);
+    if (Array.isArray(mapped.keywords.oneOf)) {
+      // Some MCP hosts render each union branch without the root properties.
+      // Include the generated object shape in every branch so discovery keeps
+      // its fields and types while retaining the same exactly-one validation.
+      const properties = z.toJSONSchema(input).properties ?? {};
+      mapped.keywords.oneOf = mapped.keywords.oneOf.map((alternative) => ({
+        type: "object",
+        additionalProperties: false,
+        ...alternative,
+        properties: Object.fromEntries(
+          Object.entries(properties).map(([name, schema]) => [
+            name,
+            {
+              ...(typeof schema === "object" ? schema : {}),
+              ...alternative.properties?.[name],
+            },
+          ]),
+        ),
+      }));
+    }
     const description = [
       ...(leaf.blocking ? ["Blocks: this call can wait indefinitely; use a bounded wait."] : []),
       `${leaf.summary}.`,
@@ -121,7 +142,7 @@ export function agentTools(document: Contract): AgentTool[] {
       path: path.join(" "),
       title: leaf.summary,
       description: description.join("\n\n"),
-      input: z.strictObject(shape).meta(mapped.keywords),
+      input: input.meta(mapped.keywords),
       arguments: args,
       annotations: {
         readOnlyHint: leaf.mutates === false,
