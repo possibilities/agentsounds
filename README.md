@@ -44,7 +44,7 @@ sound, `--json` emits a machine-readable envelope, `--help` has the rest.
 Agents read `agentsounds guide --json` — the fleet agent contract, with every command, its
 arguments, and the error codes. `--agent-help` is the same document as text.
 
-Agents can discover `agentsounds` through Executor and call its contract-derived
+Agents can discover `agentsounds` through the directly connected MCP server and call its contract-derived
 `notify` and `guide` MCP tools. `agentsounds mcp` serves stdio in process; the
 operator TUI remains outside the producer surface. Arguments retain their names
 without leading dashes. `notify` plays unless `no-play:true`; `print:true`

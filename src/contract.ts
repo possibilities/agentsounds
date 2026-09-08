@@ -98,7 +98,7 @@ export const CONTRACT: Contract = {
     audience: "agent",
   },
   guidance: [
-    "For requested audible feedback, agents discover the agentsounds MCP tools through Executor. The operator CLI and library remain available. MCP preserves the CLI envelope; print=true returns the leveled kept recipe in data.patch. Write that recipe with the native file tools and replay it using an absolute sound path. Standard input is reserved for the protocol.",
+    "For requested audible feedback, agents discover the agentsounds MCP tools through the directly connected MCP server. The operator CLI and library remain available. MCP preserves the CLI envelope; print=true returns the leveled kept recipe in data.patch. Write that recipe with the native file tools and replay it using an absolute sound path. Standard input is reserved for the protocol.",
     "Play a sound with `notify <source>`. Every press is a fresh draw from the source's pool, so the same command sounds different each time — that is the design, not a bug, and there is deliberately no seed or preset flag.",
     "When a sound has to be recognizable across a day of use — a hook, a script, anything that fires repeatedly — keep it once and replay it: `notify success --print > done.json`, then `notify --sound done.json`. A printed recipe carries its leveled volume baked in, so it replays exactly as it sounded when it was picked. A WAV is the wrong keepsake; the recipe re-renders anywhere.",
     "`--exotic` rebuilds a library sound into a new structure. Reach for it when the curated sounds feel too safe, not by default. Shopping for a sound by ear is `tui`, which is interactive and for a human.",
