@@ -8,10 +8,16 @@ synthesized from a recipe; there are no audio files in here.
 ## Install
 
 ```bash
-bun install && bun link
+scripts/install.sh --install
 ```
 
 Bun 1.3.14+, and an audio player (`afplay`, `paplay`, `aplay`, or `ffplay`).
+
+The installer runs a frozen dependency install, links `~/.local/bin/agentsounds`
+to its clean checkout, and records the deployed Git SHA. `--check` prints the
+plan; `--uninstall` removes the owned command and receipt. Kept recipes, cached
+WAVs, and pre-existing Bun links remain untouched. AgentStart invokes this
+installer as part of fleet convergence.
 
 ## Use
 
@@ -37,6 +43,15 @@ sound, `--json` emits a machine-readable envelope, `--help` has the rest.
 
 Agents read `agentsounds guide --json` — the fleet agent contract, with every command, its
 arguments, and the error codes. `--agent-help` is the same document as text.
+
+Agents can discover `agentsounds` through Executor and call its contract-derived
+`notify` and `guide` MCP tools. `agentsounds mcp` serves stdio in process; the
+operator TUI remains outside the producer surface. Arguments retain their names
+without leading dashes. `notify` plays unless `no-play:true`; `print:true`
+returns the leveled recipe in `data.patch`. MCP paths must be absolute and stdin
+is reserved for JSON-RPC. Cancellation or disconnect stops and reaps pending
+playback. The CLI envelope is preserved in structured content and standalone
+JSON text, including domain errors and their recovery.
 
 ```ts
 import { notify, draw, render, play } from "agentsounds";

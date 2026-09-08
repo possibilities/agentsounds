@@ -12,6 +12,17 @@ something, and no test can tell you that.
 
 ## Map
 
+`scripts/install.sh` owns frozen dependencies, the editable command, and its
+deployment receipt. AgentStart invokes it; do not add another managed install
+path. Its tests use disposable Git checkouts and isolated install directories.
+
+`mcp` derives producer tools from the same contract and dispatches through
+`commands.ts`, without reparsing argv or spawning this CLI. Follow
+`../agentstart/config/agent-contract/MCP.md`. Keep protocol stdout clean,
+preserve explicit flag presence when advertising defaults, and verify
+cancellation, EOF, and SIGTERM reap active playback. The sound engine remains
+vendored and unchanged.
+
 `src/` is flat, one module per concern, plus two subtrees.
 
 - `draw.ts` is the model: `SOURCES`, `MODALITIES`, and `draw()`, a faithful port of the

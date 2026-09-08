@@ -24,14 +24,18 @@ function findPlayer(): (typeof PLAYERS)[number] | null {
 export interface PlayOptions extends RenderOptions {
   /** Render and cache but do not spawn a player. */
   silent?: boolean;
+  /** Stop playback when its caller cancels or disconnects. */
+  signal?: AbortSignal;
 }
 
 /** Render the sound to a cached WAV and play it. Returns the file that was played. */
 export async function play(sound: Sound, opts: PlayOptions = {}): Promise<string> {
+  opts.signal?.throwIfAborted();
   // A reversed render is a different sound and must not overwrite the forward one's cache.
   const key = opts.reverse ? `${sound.name}-reverse` : sound.name;
   const hit = await readCached(key);
   const file = hit ?? (await writeCached(key, await render(sound, opts)));
+  opts.signal?.throwIfAborted();
   if (opts.silent) return file;
 
   const player = findPlayer();
@@ -43,7 +47,22 @@ export async function play(sound: Sound, opts: PlayOptions = {}): Promise<string
     );
   }
   const proc = Bun.spawn([player.cmd, ...player.args(file)], { stdout: "ignore", stderr: "pipe" });
-  const code = await proc.exited;
+  let killTimer: ReturnType<typeof setTimeout> | undefined;
+  const stop = () => {
+    proc.kill("SIGTERM");
+    killTimer ??= setTimeout(() => proc.kill("SIGKILL"), 1000);
+  };
+  opts.signal?.addEventListener("abort", stop, { once: true });
+  if (opts.signal?.aborted) stop();
+  let code: number;
+  try {
+    // Drain diagnostics while waiting so a verbose player cannot fill its pipe.
+    [code] = await Promise.all([proc.exited, new Response(proc.stderr).arrayBuffer()]);
+  } finally {
+    opts.signal?.removeEventListener("abort", stop);
+    if (killTimer) clearTimeout(killTimer);
+  }
+  opts.signal?.throwIfAborted();
   if (code !== 0) {
     throw new SoundsError(
       "playback_failed",

@@ -5,76 +5,56 @@ description: Generate and play procedural UI sounds from the terminal with the a
 
 # Sounds
 
-`agentsounds` synthesizes UI sounds from recipes. There are no audio files: every sound is
-built from a `Patch` (layers, envelopes, filters, effects) and rendered on demand.
+Use Sounds for requested audible feedback or a procedural UI sound. A sound is
+synthesized from a recipe; rendered WAVs can be cached or explicitly exported.
+Each new draw is fresh. For a recognizable repeated cue, keep the recipe once
+and replay it.
 
-The model comes from its upstream product page and is worth holding: you pick a **source**,
-pick a **modality**, and press. Every press is a **fresh draw** — you generate until one
-fits. Nothing is a preset.
+## Discover and call
 
-## Play a sound now
+Read Executor's own `skills({name:"execute"})` for the current calling workflow.
+Inside `execute`, discover `tools.search({namespace:"agentsounds"})`, inspect
+`tools.describe.tool({path})`, then call `tools[path](args)` with that returned
+full path. Follow `hasMore` and `nextOffset` for further discovery pages.
+The producer tools are `notify` and `guide`; the human audition TUI is separate.
 
-```bash
-agentsounds notify success
-agentsounds notify error --exotic
-agentsounds notify --list          # the eight sources and what each is for
+`notify` plays through the system audio device by default. Use `no-play:true`
+when preparing a recipe or export silently. The following arguments make one
+fresh success sound and return its leveled recipe:
+
+```json
+{"source":"success","print":true}
 ```
 
-Sources: `tap`, `hover`, `transition`, `success`, `error`, `warning`, `notification`, and
-`experimental` (category-agnostic, five engines at once). Modalities: `familiar` (default —
-the curated library, varied within strict bounds) and `exotic` (`--exotic` — the remix engine
-rebuilding a library sound by learned taste).
+Choose exactly one of `source`, an absolute kept-recipe `sound` path, or
+`list:true`. List the eight sources when their intended uses are unclear.
+Choose the `familiar` modality by default; `exotic:true` remixes a sound when
+variation is wanted. `exotic` and `modality` conflict, and neither belongs with
+`sound`, which replays an existing recipe.
 
-## Make a sound stable
+## Keep and replay
 
-This is the part that matters for hooks. A draw is always fresh, so a sound that must be
-recognizable across a day of use is **kept as a recipe** and replayed:
+With `print:true`, the inner envelope's `data.patch` contains the kept recipe,
+with its leveled volume baked in. Save that object as JSON using native file
+tools, then call `notify` with its absolute `sound` path. Do not save the whole
+envelope as a recipe. There is no seed or preset parameter.
 
-```bash
-agentsounds notify success --print > ~/.config/agentsounds/done.json
-agentsounds notify --sound ~/.config/agentsounds/done.json
-```
+`save` writes and may overwrite an absolute WAV destination; `reverse:true`
+reverses playback or export. Cancelling a call or closing the MCP connection
+stops its playback. Recipes and explicitly saved WAVs remain available.
+For source/modality choices, recipe formats, and operator hooks, read
+[recipes and playback](references/recipes.md).
 
-A kept recipe carries its leveled volume baked in, so it replays exactly as it sounded when
-it was picked. Shop for one interactively with `agentsounds tui`.
+## Results and recovery
 
-Do not reach for a seed or a preset flag — there isn't one, deliberately. The recipe file is
-the mechanism.
+MCP preserves `{schema_version, ok, error, data}` in `structuredContent` and a
+standalone JSON text block. Executor wraps successful MCP results; inspect the
+inner envelope. For a failure, parse the standalone JSON block in
+`error.details.content` because the aggregator may omit structured error data.
+Diagnostic prose is a separate block. Read the original code and recovery:
+`empty_pool`, `bad_recipe`, `no_player`, or `playback_failed`. Usage faults and
+unexpected failures without a domain code remain plain tool errors.
 
-## Other flags
-
-| Flag            | Effect                                        |
-| --------------- | --------------------------------------------- |
-| `--save <path>` | write a WAV instead of only playing           |
-| `--reverse`     | play it backwards                             |
-| `--no-play`     | do the work silently (pairs with save/print)  |
-| `--json`        | `{schema_version, ok, error, data}` envelope  |
-
-## Output contract
-
-`--json` gives the house envelope on stdout: exit 0 with `ok:true`, exit 1 with `ok:false`
-and a `recovery` line written to be run verbatim. A grammar mistake is different: help to
-**stderr**, exit 2, never an envelope.
-
-Error codes: `empty_pool` (no curated sounds for that source), `bad_recipe` (the `--sound`
-file is not a recipe), `no_player` (no audio player installed), `playback_failed`.
-
-## As a library
-
-```ts
-import { notify, draw, render, play } from "agentsounds";
-await notify("success");
-const sound = await draw("tap", { modality: "exotic" });
-await Bun.write("tap.wav", await render(sound));
-```
-
-The CLI is a thin shell over these, so anything one can do the other can.
-
-## Anti-patterns
-
-| Don't                                          | Do                                                |
-| ---------------------------------------------- | ------------------------------------------------- |
-| Expect `notify success` to sound the same twice | keep the recipe and replay it with `--sound`       |
-| Save a raw patch by hand from the library API   | `--print`, which bakes the level in                |
-| Grep the human output                           | `--json`                                           |
-| Ship a WAV to get a repeatable sound            | keep the recipe; it re-renders anywhere            |
+The installed `guide` supplies current command details. The operator CLI and
+library remain available for scripts and hooks; preserve their intended sound
+and playback timing when adapting an existing workflow.

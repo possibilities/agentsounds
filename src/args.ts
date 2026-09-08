@@ -17,7 +17,6 @@ function choicesHint(a: ContractArgument): string {
  */
 export function parse(c: ContractCommand, argv: readonly string[]): Parsed {
   const accepted = argumentsOf(c);
-  const positionals = accepted.filter((a) => a.positional);
   const args: string[] = [];
   const flags: Record<string, string | boolean> = {};
 
@@ -46,6 +45,16 @@ export function parse(c: ContractCommand, argv: readonly string[]): Parsed {
     flags[flagKey(name)] = value;
   }
 
+  const parsed = { args, flags };
+  validateParsed(c, parsed);
+  return parsed;
+}
+
+/** The same contract checks apply to structured MCP input without argv. */
+export function validateParsed(c: ContractCommand, parsed: Parsed): void {
+  const accepted = argumentsOf(c);
+  const positionals = accepted.filter((a) => a.positional);
+  const { args, flags } = parsed;
   // Positionals are validated after flags so a bad value reports the allowed set, and a
   // missing required one reports it too: calling `notify` bare must say what the sources are.
   positionals.forEach((spec, i) => {
@@ -96,6 +105,4 @@ export function parse(c: ContractCommand, argv: readonly string[]): Parsed {
       }
     }
   }
-
-  return { args, flags };
 }

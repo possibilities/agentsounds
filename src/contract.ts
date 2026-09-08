@@ -34,6 +34,20 @@ export interface ContractConstraint {
   description?: string;
 }
 
+export function constraintSentence(
+  constraint: ContractConstraint,
+  spell: (name: string) => string = (name) => name,
+): string {
+  const names = constraint.arguments.map(spell);
+  const sentence =
+    constraint.kind === "one_of"
+      ? `${constraint.required ? "Exactly one" : "At most one"} of ${names.join(", ")}`
+      : constraint.kind === "conflicts"
+        ? `${names.join(" and ")} cannot be combined`
+        : `${names[0]} requires ${names.slice(1).join(" and ")}`;
+  return `${sentence}${constraint.description ? `: ${constraint.description}` : ""}.`;
+}
+
 export interface ContractStdin {
   accepts: "text" | "json";
   required?: boolean;
@@ -84,6 +98,7 @@ export const CONTRACT: Contract = {
     audience: "agent",
   },
   guidance: [
+    "For requested audible feedback, agents discover the agentsounds MCP tools through Executor. The operator CLI and library remain available. MCP preserves the CLI envelope; print=true returns the leveled kept recipe in data.patch. Write that recipe with the native file tools and replay it using an absolute sound path. Standard input is reserved for the protocol.",
     "Play a sound with `notify <source>`. Every press is a fresh draw from the source's pool, so the same command sounds different each time — that is the design, not a bug, and there is deliberately no seed or preset flag.",
     "When a sound has to be recognizable across a day of use — a hook, a script, anything that fires repeatedly — keep it once and replay it: `notify success --print > done.json`, then `notify --sound done.json`. A printed recipe carries its leveled volume baked in, so it replays exactly as it sounded when it was picked. A WAV is the wrong keepsake; the recipe re-renders anywhere.",
     "`--exotic` rebuilds a library sound into a new structure. Reach for it when the curated sounds feel too safe, not by default. Shopping for a sound by ear is `tui`, which is interactive and for a human.",
@@ -297,6 +312,16 @@ export const CONTRACT: Contract = {
           description: "Browse and audition sounds interactively.",
         },
       ],
+    },
+    {
+      name: "mcp",
+      summary: "Serve contract-derived producer tools over stdio",
+      audience: "internal",
+      mutates: true,
+      blocking: true,
+      guidance:
+        "Serves until transport close, stdin EOF, or a termination signal; pending playback is cancelled. Standard output is exclusively JSON-RPC.",
+      arguments: [],
     },
     {
       name: "guide",
