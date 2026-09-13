@@ -1,3 +1,5 @@
+> *Slop Made With Sweat: Made with a lot of love by someone who loves code but read none of it.*
+
 # agentsounds
 
 Procedural UI sounds for the terminal — a library, a CLI, and a TUI. Every sound is
